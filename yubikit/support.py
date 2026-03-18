@@ -257,18 +257,19 @@ def read_info(conn: Connection, pid: PID | None = None) -> DeviceInfo:
     if pid:
         key_type: YUBIKEY | None = pid.yubikey_type
         interfaces = pid.usb_interfaces
-    elif isinstance(conn, SmartCardConnection) and conn.transport == TRANSPORT.NFC:
-        # No PID for NFC connections
+    elif isinstance(conn, SmartCardConnection) and pid is None:
+        # No PID: NFC connection or non-YubiKey contact reader
         key_type = None
         interfaces = USB_INTERFACE(0)  # Add interfaces later
-        # For NEO we need to figure out the mode, newer keys get it from Management
-        protocol = SmartCardProtocol(conn)
-        try:
-            resp = protocol.select(AID.OTP)
-            if resp[0] == 3 and len(resp) > 6:
-                interfaces = Mode.from_code(resp[6]).interfaces
-        except ApplicationNotAvailableError:
-            pass  # OTP turned off, this must be YK5, no problem
+        if conn.transport == TRANSPORT.NFC:
+            # For NEO we need to figure out the mode, newer keys get it from Management
+            protocol = SmartCardProtocol(conn)
+            try:
+                resp = protocol.select(AID.OTP)
+                if resp[0] == 3 and len(resp) > 6:
+                    interfaces = Mode.from_code(resp[6]).interfaces
+            except ApplicationNotAvailableError:
+                pass  # OTP turned off, this must be YK5, no problem
     else:
         raise ValueError("PID must be provided for non-NFC connections")
 

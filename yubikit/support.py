@@ -329,6 +329,19 @@ def read_info(conn: Connection, pid: PID | None = None) -> DeviceInfo:
                 TRANSPORT.USB: CAPABILITY.OTP | CAPABILITY.U2F
             }
 
+        # No PID means a non-YubiKey contact reader: interfaces was never populated.
+        # Infer USB interface flags from probed capabilities so the masking below
+        # does not strip capabilities that were successfully detected.
+        if pid is None and not interfaces:
+            if usb_enabled & (CAPABILITY.U2F | CAPABILITY.FIDO2):
+                interfaces |= USB_INTERFACE.FIDO
+            if usb_enabled & (
+                CAPABILITY.PIV | CAPABILITY.OATH | CAPABILITY.OPENPGP | CAPABILITY.HSMAUTH
+            ):
+                interfaces |= USB_INTERFACE.CCID
+            if usb_enabled & CAPABILITY.OTP:
+                interfaces |= USB_INTERFACE.OTP
+
         if USB_INTERFACE.OTP not in interfaces:
             usb_enabled &= ~CAPABILITY.OTP
         if USB_INTERFACE.FIDO not in interfaces:

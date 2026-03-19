@@ -42,6 +42,7 @@ from .core.fido import FidoConnection
 from .core.otp import OtpConnection
 from .core.smartcard import (
     AID,
+    ApduError,
     SmartCardConnection,
     SmartCardProtocol,
 )
@@ -67,14 +68,41 @@ _AID_U2F_YUBICO = bytes.fromhex("a0000005271002")
 # Only used for pre YK4 devices, does not need to include any newer applets
 _SCAN_APPLETS = (
     # OTP will be checked elsewhere and thus isn't needed here
-    (AID.FIDO, CAPABILITY.U2F),
-    (_AID_U2F_YUBICO, CAPABILITY.U2F),
+    # FIDO is handled separately by _detect_fido_capabilities()
     (AID.PIV, CAPABILITY.PIV),
     (AID.OPENPGP, CAPABILITY.OPENPGP),
     (AID.OATH, CAPABILITY.OATH),
 )
 
 _BASE_NEO_APPS = CAPABILITY.OTP | CAPABILITY.OATH | CAPABILITY.PIV | CAPABILITY.OPENPGP
+
+
+def _detect_fido_capabilities(protocol: SmartCardProtocol) -> CAPABILITY:
+    """Probe the FIDO applet to distinguish U2F-only from FIDO2 (CTAP2) devices."""
+    try:
+        protocol.select(AID.FIDO)
+    except ApplicationNotAvailableError:
+        # Fall back to old Yubico U2F AID
+        try:
+            protocol.select(_AID_U2F_YUBICO)
+            return CAPABILITY.U2F
+        except ApplicationNotAvailableError:
+            return CAPABILITY(0)
+
+    # AID.FIDO responded — at least U2F. Probe CTAP2 via GET_INFO (cmd 0x04).
+    # APDU: NFCCTAP_MSG  CLA=0x80  INS=0x10  P1=0x80  P2=0x00  data=b"\x04"
+    try:
+        protocol.send_apdu(0x80, 0x10, 0x80, 0x00, b"\x04")
+        return CAPABILITY.U2F | CAPABILITY.FIDO2  # SW 9000 — short response
+    except ApduError as e:
+        if e.sw == 0x9100:
+            # SW 9100 = NFCCTAP_GETRESPONSE: response present but too long.
+            # CTAP2 is supported; we don't need the full GET_INFO payload here.
+            return CAPABILITY.U2F | CAPABILITY.FIDO2
+    except Exception:
+        pass
+
+    return CAPABILITY.U2F  # GET_INFO failed — U2F only
 
 
 def _read_info_ccid(conn, key_type, interfaces):
@@ -117,6 +145,10 @@ def _read_info_ccid(conn, key_type, interfaces):
     # Scan for remaining capabilities
     logger.debug("Scan for available applications...")
     protocol = SmartCardProtocol(conn)
+    fido_caps = _detect_fido_capabilities(protocol)
+    if fido_caps:
+        capabilities |= fido_caps
+        logger.debug("Found FIDO capabilities: %s", fido_caps)
     for aid, code in _SCAN_APPLETS:
         try:
             protocol.select(aid)

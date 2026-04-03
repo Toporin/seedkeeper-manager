@@ -2,6 +2,7 @@
 *.egg-info
 *.egg/
 .tox/
+.idea/
 *.vagrant
 vagrant/development/*.log
 .eggs/

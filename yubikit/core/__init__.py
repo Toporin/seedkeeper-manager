@@ -104,6 +104,19 @@ class YUBIKEY(Enum):
     YKP = "YubiKey Plus"
     YK4 = "YubiKey"  # This includes YubiKey 5
 
+@unique
+class SEEDKEEPER(Enum):
+    """Seedkeeper device"""
+
+    STD = "Seedkeeper Standard"
+    PRO = "Seedkeeper PRO"
+
+@unique
+class GENERIC(Enum):
+    """Generic device"""
+
+    STD = "Generic device"
+
 
 class Connection(abc.ABC):
     """A connection to a YubiKey"""

@@ -32,6 +32,7 @@ from .core import (
     PID,
     TRANSPORT,
     YUBIKEY,
+    SEEDKEEPER,
     ApplicationNotAvailableError,
     CommandError,
     Connection,
@@ -288,7 +289,7 @@ def read_info(conn: Connection, pid: PID | None = None) -> DeviceInfo:
 
     logger.debug(f"Attempting to read device info, using {type(conn).__name__}")
     if pid:
-        key_type: YUBIKEY | None = pid.yubikey_type
+        key_type: YUBIKEY | SEEDKEEPER | None = pid.yubikey_type
         interfaces = pid.usb_interfaces
     elif isinstance(conn, SmartCardConnection) and pid is None:
         # No PID: NFC connection or non-YubiKey contact reader
@@ -418,7 +419,7 @@ def _is_preview(version):
     return False
 
 
-def get_name(info: DeviceInfo, key_type: YUBIKEY | None) -> str:
+def get_name(info: DeviceInfo, key_type: YUBIKEY | SEEDKEEPER | None) -> str:
     """Determine the product name of a YubiKey
 
     :param info: The device info.
@@ -428,7 +429,13 @@ def get_name(info: DeviceInfo, key_type: YUBIKEY | None) -> str:
 
     # Guess the key type (over NFC)
     if not key_type:
-        if info.version[0] == 3:
+        if CAPABILITY.SEEDKEEPER in usb_supported:
+            # Seedkeeper type
+            if CAPABILITY.FIDO2 in usb_supported:
+                key_type = SEEDKEEPER.PRO
+            else:
+                key_type = SEEDKEEPER.STD
+        elif info.version[0] == 3:
             key_type = YUBIKEY.NEO
         elif info.serial is None and _fido_only(usb_supported):
             key_type = YUBIKEY.SKY if info.version < (5, 2, 8) else YUBIKEY.YK4

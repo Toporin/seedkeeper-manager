@@ -74,6 +74,9 @@ class CAPABILITY(IntFlag):
     OPENPGP = 0x08
     HSMAUTH = 0x100
 
+    # Seedkeeper by Satochip
+    SEEDKEEPER = 0x1000
+
     def __str__(self):
         name = "|".join(c.name or str(c) for c in CAPABILITY if c in self)
         return f"{name}: {hex(self)}"
@@ -125,6 +128,8 @@ class CAPABILITY(IntFlag):
             return "OpenPGP"
         elif self == CAPABILITY.HSMAUTH:
             return "YubiHSM Auth"
+        elif self == CAPABILITY.SEEDKEEPER:
+            return "Seedkeeper by Satochip"
         return self.name or f"Unknown(0x{self:x})"
 
     @property

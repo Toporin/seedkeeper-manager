@@ -104,6 +104,8 @@ class AID(bytes, Enum):
     HSMAUTH = bytes.fromhex("a000000527210701")
     SECURE_DOMAIN = bytes.fromhex("a000000151000000")
 
+    #Seedkeeper by Satochip
+    SEEDKEEPER = bytes.fromhex("536565644b656570657200")
 
 @unique
 class SW(IntEnum):

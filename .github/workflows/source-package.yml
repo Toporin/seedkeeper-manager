@@ -43,13 +43,13 @@ jobs:
           export SOURCE_DATE_EPOCH=$(git show --no-patch --format=%ct)
           uv build
           mkdir artifacts
-          mv dist/yubikey_manager-*.tar.gz artifacts/
-          mv dist/yubikey_manager-*.whl artifacts/
+          mv dist/seedkeeper_manager-*.tar.gz artifacts/
+          mv dist/seedkeeper_manager-*.whl artifacts/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
-          name: yubikey-manager-source-package
+          name: seedkeeper-manager-source-package
           path: artifacts
 
   docs:
@@ -83,5 +83,5 @@ jobs:
       - name: Upload documentation
         uses: actions/upload-artifact@v6
         with:
-          name: yubikey-manager-docs
+          name: seedkeeper-manager-docs
           path: docs/_build/html

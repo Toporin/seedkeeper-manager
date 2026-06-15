@@ -43,7 +43,7 @@ jobs:
           pip install dist/*.tar.gz
           ykman --version
           [[ -z "$(ykman --version | grep -E "not found|missing")" ]]
-          pip uninstall -y yubikey-manager
+          pip uninstall -y seedkeeper-manager
 
       - name: Install from wheel
         shell: bash
@@ -51,7 +51,7 @@ jobs:
           pip install dist/*.whl
           ykman --version
           [[ -z "$(ykman --version | grep -E "not found|missing")" ]]
-          pip uninstall -y yubikey-manager
+          pip uninstall -y seedkeeper-manager
 
       - name: PyInstaller
         shell: bash

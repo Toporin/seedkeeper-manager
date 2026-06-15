@@ -1,8 +1,16 @@
-== YubiKey Manager CLI
-image:https://github.com/Yubico/yubikey-manager/actions/workflows/source-package.yml/badge.svg["Source package build", link="https://github.com/Yubico/yubikey-manager/actions/workflows/source-package.yml"]
-image:https://github.com/Yubico/yubikey-manager/actions/workflows/windows.yml/badge.svg["Windows build", link="https://github.com/Yubico/yubikey-manager/actions/workflows/windows.yml"]
-image:https://github.com/Yubico/yubikey-manager/actions/workflows/macOS.yml/badge.svg["MacOS build", link="https://github.com/Yubico/yubikey-manager/actions/workflows/macOS.yml"]
-image:https://github.com/Yubico/yubikey-manager/actions/workflows/ubuntu.yml/badge.svg["Ubuntu build", link="https://github.com/Yubico/yubikey-manager/actions/workflows/ubuntu.yml"]
+== YubiKey Manager CLI (Satochip fork)
+
+NOTE: This is a fork of Yubico's https://github.com/Yubico/yubikey-manager[yubikey-manager],
+published to PyPI as `seedkeeper-manager`. It is a *drop-in replacement*: the importable
+package names (`yubikit`, `ykman`) and the `ykman` CLI command are unchanged, so a project can
+switch to this fork by changing only its requirement from `yubikey-manager` to
+`seedkeeper-manager` — no code changes. Note that `seedkeeper-manager` and `yubikey-manager`
+cannot be installed in the same environment at the same time.
+
+image:https://github.com/Toporin/seedkeeper-manager/actions/workflows/source-package.yml/badge.svg["Source package build", link="https://github.com/Toporin/seedkeeper-manager/actions/workflows/source-package.yml"]
+image:https://github.com/Toporin/seedkeeper-manager/actions/workflows/windows.yml/badge.svg["Windows build", link="https://github.com/Toporin/seedkeeper-manager/actions/workflows/windows.yml"]
+image:https://github.com/Toporin/seedkeeper-manager/actions/workflows/macOS.yml/badge.svg["MacOS build", link="https://github.com/Toporin/seedkeeper-manager/actions/workflows/macOS.yml"]
+image:https://github.com/Toporin/seedkeeper-manager/actions/workflows/ubuntu.yml/badge.svg["Ubuntu build", link="https://github.com/Toporin/seedkeeper-manager/actions/workflows/ubuntu.yml"]
 
 Python 3.10 (or later) library and command line tool for configuring a YubiKey.
 If you're looking for a graphical application, check out  https://developers.yubico.com/yubioath-flutter/[Yubico Authenticator].
@@ -52,7 +60,7 @@ subcommands:
 
 === Versioning/Compatibility
 This project follows https://semver.org/[Semantic Versioning]. Any project
-depending on yubikey-manager should take care when specifying version ranges to
+depending on seedkeeper-manager should take care when specifying version ranges to
 not include any untested major version, as it is likely to have backwards
 incompatible changes. For example, you should NOT depend on ">=5", as it has no
 upper bound. Instead, depend on ">=5, <6", as any release before 6 will be
@@ -65,14 +73,14 @@ public API, and may be changed between versions at any time.
 YubiKey Manager can be installed independently of platform by using pip (or
 equivalent):
 
-  pip install --user yubikey-manager
+  pip install --user seedkeeper-manager
 
 On Linux platforms you will need `pcscd` installed and running to be able to
 communicate with a YubiKey over the SmartCard interface. Additionally, you may
 need to set permissions for your user to access YubiKeys via the HID interfaces.
 More information available link:doc/Device_Permissions.adoc[here].
 
-Some of the libraries used by yubikey-manager have C-extensions, and may require
+Some of the libraries used by seedkeeper-manager have C-extensions, and may require
 additional dependencies to build, such as http://www.swig.org/[swig] and
 potentially https://pcsclite.apdu.fr/[PCSC lite].
 
@@ -83,11 +91,11 @@ detailed instructions on how to install, if available.
 
 ==== Windows
 A Windows installer is available to download from the
-https://github.com/Yubico/yubikey-manager/releases/latest[Releases page].
+https://github.com/Toporin/seedkeeper-manager/releases/latest[Releases page].
 
 ==== MacOS
 A MacOS installer is available to download from the
-https://github.com/Yubico/yubikey-manager/releases/latest[Releases page].
+https://github.com/Toporin/seedkeeper-manager/releases/latest[Releases page].
 
 Additionally, packages are available from Homebrew and MacPorts.
 
@@ -115,7 +123,7 @@ Packages are available for several Linux distributions by third party package
 maintainers.
 
 Python-specific tools such as pip, pipx, or uv can be used directly to install and
-manage yubikey-manager, and is generally the recommended approach.
+manage seedkeeper-manager, and is generally the recommended approach.
 
 ==== FreeBSD
 Although not being officially supported on this platform, YubiKey Manager can be

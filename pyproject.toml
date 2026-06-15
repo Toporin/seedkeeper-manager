@@ -1,9 +1,12 @@
 [project]
-name = "yubikey-manager"
+name = "seedkeeper-manager"
 version = "5.9.2-dev.0"
-description = "Library and CLI for managing your YubiKey configuration."
+description = "Satochip fork of yubikey-manager: library and CLI for managing your YubiKey/Seedkeeper configuration. Drop-in replacement (same `yubikit`/`ykman` import names)."
 authors = [
   { name = "Dain Nilsson", email = "<dain@yubico.com>" }
+]
+maintainers = [
+  { name = "Toporin", email = "<satochip.wallet@gmail.com>" }
 ]
 readme = "README.adoc"
 requires-python = ">=3.10, <4"
@@ -36,7 +39,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Yubico/yubikey-manager"
+Homepage = "https://github.com/Toporin/seedkeeper-manager"
 
 [project.scripts]
 ykman = "ykman._cli.__main__:main"

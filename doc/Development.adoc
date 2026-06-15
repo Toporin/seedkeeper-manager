@@ -22,12 +22,12 @@ Make sure the http://www.swig.org/[swig] executable is in your PATH.
     # Tested on Fedora 34
     $ sudo dnf install pcsc-lite-devel python3-devel swig
 
-=== Install yubikey-manager from source
+=== Install seedkeeper-manager from source
 
 Clone the repository:
 
-    $ git clone https://github.com/Yubico/yubikey-manager.git
-    $ cd yubikey-manager
+    $ git clone https://github.com/Toporin/seedkeeper-manager.git
+    $ cd seedkeeper-manager
 
 === Running from source
 
@@ -89,6 +89,5 @@ run with the attached YubiKey.
 
 === Packaging
 
-For third-party packaging, use the source releases and signatures available
-https://developers.yubico.com/yubikey-manager/Releases/[here].
-These artifacts are also published on Github on the Releases page.
+For third-party packaging, use the source releases published on Github on the
+https://github.com/Toporin/seedkeeper-manager/releases[Releases page].

@@ -27,9 +27,9 @@ def get_version():
 
 # -- Project information -----------------------------------------------------
 
-project = "yubikey-manager"
-copyright = "2023, Yubico"
-author = "Yubico"
+project = "seedkeeper-manager"
+copyright = "2023, Yubico; fork maintained by Toporin"
+author = "Yubico; Toporin"
 
 # The full version, including alpha/beta/rc tags
 release = get_version()
@@ -121,7 +121,7 @@ html_show_sourcelink = False
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "yubikey-managerdoc"
+htmlhelp_basename = "seedkeeper-managerdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -147,9 +147,9 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "yubikey-manager.tex",
-        "yubikey-manager Documentation",
-        "Yubico",
+        "seedkeeper-manager.tex",
+        "seedkeeper-manager Documentation",
+        "Yubico; Toporin",
         "manual",
     )
 ]
@@ -160,7 +160,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "yubikey-manager", "yubikey-manager Documentation", [author], 1)
+    (master_doc, "seedkeeper-manager", "seedkeeper-manager Documentation", [author], 1)
 ]
 
 
@@ -172,10 +172,10 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "yubikey-manager",
-        "yubikey-manager Documentation",
+        "seedkeeper-manager",
+        "seedkeeper-manager Documentation",
         author,
-        "yubikey-manager",
+        "seedkeeper-manager",
         "One line description of project.",
         "Miscellaneous",
     )

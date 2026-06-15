@@ -78,6 +78,68 @@ _SCAN_APPLETS = (
 
 _BASE_NEO_APPS = CAPABILITY.OTP | CAPABILITY.OATH | CAPABILITY.PIV | CAPABILITY.OPENPGP
 
+# Firmware version reported for a Seedkeeper when CTAP2 does not expose one.
+_FALLBACK_VERSION = Version(0, 1, 0)
+
+
+def _read_ctap2_info(conn):
+    """Read the CTAP2 Info from a FIDO or SmartCard connection, or None.
+
+    A :class:`FidoConnection` is itself a CtapDevice; a SmartCardConnection is
+    wrapped in :class:`SmartCardCtapDevice` so CTAP2 GetInfo can be issued over
+    CCID. Returns ``None`` if the device does not support CTAP2.
+    """
+    try:
+        from fido2.ctap2 import Ctap2
+
+        if isinstance(conn, SmartCardConnection):
+            from .core.fido import SmartCardCtapDevice
+
+            device = SmartCardCtapDevice(conn)
+        else:
+            device = conn
+        return Ctap2(device).info
+    except Exception:
+        logger.debug("Unable to read CTAP2 info", exc_info=True)
+        return None
+
+
+def _device_info_from_ctap2(info) -> DeviceInfo | None:
+    """Build a Seedkeeper :class:`DeviceInfo` from a CTAP2 Info, or None.
+
+    A Seedkeeper has no YubiKey Management applet (so the normal read fails) but
+    does expose CTAP2. Building the info here, with the SEEDKEEPER capability,
+    keeps it from being mislabeled as a YubiKey NEO by the version-3 fallbacks.
+    Returns ``None`` if the CTAP2 device is not a Seedkeeper.
+    """
+    if info is None:
+        return None
+
+    # Prefer the firmware version reported by CTAP2 (CTAP 2.1+); the value is a
+    # packed integer (major << 16 | minor << 8 | patch).
+    fw = getattr(info, "firmware_version", None)
+    if isinstance(fw, int) and fw > 0:
+        version = Version((fw >> 16) & 0xFF, (fw >> 8) & 0xFF, fw & 0xFF)
+    else:
+        version = _FALLBACK_VERSION
+
+    capabilities = CAPABILITY.FIDO2 | CAPABILITY.SEEDKEEPER
+    logger.debug("Identified Seedkeeper over CTAP2, version %s", version)
+    return DeviceInfo(
+        config=DeviceConfig(
+            enabled_capabilities={},  # Populated later
+            auto_eject_timeout=0,
+            challenge_response_timeout=0,
+            device_flags=DEVICE_FLAG(0),
+        ),
+        serial=None,
+        version=version,
+        form_factor=FORM_FACTOR.UNKNOWN,
+        supported_capabilities={TRANSPORT.USB: capabilities},
+        is_locked=False,
+        version_qualifier=VersionQualifier(version),
+    )
+
 
 def _detect_fido_capabilities(protocol: SmartCardProtocol) -> CAPABILITY:
     """Probe the FIDO applet to distinguish U2F-only from FIDO2 (CTAP2) devices."""
@@ -163,6 +225,21 @@ def _read_info_ccid(conn, key_type, interfaces):
                 "Error selecting aid: %s, capability: %s", aid, code, exc_info=True
             )
 
+    # A non-YubiKey CTAP2 smartcard (e.g. Seedkeeper) reaches this fallback and
+    # would otherwise be labeled a YubiKey NEO (the version-3 guess above). If it
+    # exposes CTAP2, identify it and recover a real firmware version. Selecting
+    # the SEEDKEEPER applet alone (via _SCAN_APPLETS) already sets the capability,
+    # but CTAP2 also fixes the version.
+    if (
+        key_type is None
+        and serial is None
+        and capabilities & (CAPABILITY.FIDO2 | CAPABILITY.SEEDKEEPER)
+    ):
+        device_info = _device_info_from_ctap2(_read_ctap2_info(conn))
+        if device_info is not None:
+            version = device_info.version
+            #capabilities |= CAPABILITY.SEEDKEEPER | CAPABILITY.FIDO2
+
     if not capabilities and not key_type:
         # NFC, no capabilities, probably not a YubiKey.
         raise ValueError("Device does not seem to be a YubiKey")
@@ -243,8 +320,16 @@ def _read_info_ctap(conn, key_type, interfaces):
     try:
         mgmt = ManagementSession(conn)
         return mgmt.read_device_info()
-    except Exception:  # SKY 1, NEO, or YKP
+    except Exception:  # SKY 1, NEO, YKP, or non-YubiKey FIDO2 smartcard (Seedkeeper)
         logger.debug("Unable to get info via Management application, use fallback")
+
+        # A non-YubiKey CTAP2 smartcard (e.g. Seedkeeper) has no Management applet
+        # but does expose CTAP2. Identify it before the YubiKey guesses below so it
+        # is not mislabeled as a YubiKey NEO. key_type is None when there is no PID.
+        if key_type is None:
+            device_info = _device_info_from_ctap2(_read_ctap2_info(conn))
+            if device_info is not None:
+                return device_info
 
         # Best guess version
         if key_type == YUBIKEY.YKP:
@@ -286,7 +371,6 @@ def read_info(conn: Connection, pid: PID | None = None) -> DeviceInfo:
     :param conn: A connection to a YubiKey.
     :param pid: The USB Product ID.
     """
-
     logger.debug(f"Attempting to read device info, using {type(conn).__name__}")
     if pid:
         key_type: YUBIKEY | SEEDKEEPER | None = pid.yubikey_type

@@ -238,7 +238,7 @@ def _read_info_ccid(conn, key_type, interfaces):
         device_info = _device_info_from_ctap2(_read_ctap2_info(conn))
         if device_info is not None:
             version = device_info.version
-            #capabilities |= CAPABILITY.SEEDKEEPER | CAPABILITY.FIDO2
+            # capabilities |= CAPABILITY.SEEDKEEPER | CAPABILITY.FIDO2
 
     if not capabilities and not key_type:
         # NFC, no capabilities, probably not a YubiKey.
@@ -422,11 +422,11 @@ def read_info(conn: Connection, pid: PID | None = None) -> DeviceInfo:
             if usb_enabled & (CAPABILITY.U2F | CAPABILITY.FIDO2):
                 interfaces |= USB_INTERFACE.FIDO
             if usb_enabled & (
-                    CAPABILITY.PIV
-                    | CAPABILITY.OATH
-                    | CAPABILITY.OPENPGP
-                    | CAPABILITY.HSMAUTH
-                    | CAPABILITY.SEEDKEEPER
+                CAPABILITY.PIV
+                | CAPABILITY.OATH
+                | CAPABILITY.OPENPGP
+                | CAPABILITY.HSMAUTH
+                | CAPABILITY.SEEDKEEPER
             ):
                 interfaces |= USB_INTERFACE.CCID
             if usb_enabled & CAPABILITY.OTP:

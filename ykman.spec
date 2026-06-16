@@ -54,7 +54,7 @@ def Entrypoint(dist, group, name, **kwargs):
 block_cipher = None
 
 
-a = Entrypoint("yubikey-manager", "console_scripts", "ykman")
+a = Entrypoint("seedkeeper-manager", "console_scripts", "ykman")
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(

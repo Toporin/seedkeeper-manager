@@ -30,9 +30,9 @@ from dataclasses import replace
 
 from .core import (
     PID,
+    SEEDKEEPER,
     TRANSPORT,
     YUBIKEY,
-    SEEDKEEPER,
     ApplicationNotAvailableError,
     CommandError,
     Connection,

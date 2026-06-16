@@ -164,7 +164,7 @@ def _detect_fido_capabilities(protocol: SmartCardProtocol) -> CAPABILITY:
             # CTAP2 is supported; we don't need the full GET_INFO payload here.
             return CAPABILITY.U2F | CAPABILITY.FIDO2
     except Exception:
-        pass
+        logger.debug("CTAP2 not supported, falling back to U2F only", exc_info=True)
 
     return CAPABILITY.U2F  # GET_INFO failed — U2F only
 
@@ -422,7 +422,11 @@ def read_info(conn: Connection, pid: PID | None = None) -> DeviceInfo:
             if usb_enabled & (CAPABILITY.U2F | CAPABILITY.FIDO2):
                 interfaces |= USB_INTERFACE.FIDO
             if usb_enabled & (
-                CAPABILITY.PIV | CAPABILITY.OATH | CAPABILITY.OPENPGP | CAPABILITY.HSMAUTH
+                    CAPABILITY.PIV
+                    | CAPABILITY.OATH
+                    | CAPABILITY.OPENPGP
+                    | CAPABILITY.HSMAUTH
+                    | CAPABILITY.SEEDKEEPER
             ):
                 interfaces |= USB_INTERFACE.CCID
             if usb_enabled & CAPABILITY.OTP:

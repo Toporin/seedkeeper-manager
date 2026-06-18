@@ -25,7 +25,9 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import ctypes
 import logging
+import sys
 from dataclasses import replace
 
 from smartcard.Exceptions import CardConnectionException
@@ -147,19 +149,22 @@ def _detect_fido_capabilities(protocol: SmartCardProtocol) -> CAPABILITY:
     """Probe the FIDO applet to distinguish U2F-only from FIDO2 (CTAP2) devices."""
     try:
         protocol.select(AID.FIDO)
-    except (ApplicationNotAvailableError, CardConnectionException) as e:
-        if isinstance(e, CardConnectionException):
-            logger.debug(
-                "Failed to connect, on Windows admin rights may be required!",
-                exc_info=True,
-            )
-
+    except ApplicationNotAvailableError:
         # Fall back to old Yubico U2F AID
         try:
             protocol.select(_AID_U2F_YUBICO)
             return CAPABILITY.U2F
         except ApplicationNotAvailableError:
             return CAPABILITY(0)
+    except CardConnectionException:
+        # on windows, FIDO2 access requires admin rights
+        if sys.platform == "win32" and bool(ctypes.windll.shell32.IsUserAnAdmin()):
+            logger.debug(
+                "Failed to connect, on Windows admin rights are required!",
+                exc_info=True,
+            )
+            return CAPABILITY.U2F | CAPABILITY.FIDO2
+        return CAPABILITY(0)
 
     # AID.FIDO responded — at least U2F. Probe CTAP2 via GET_INFO (cmd 0x04).
     # APDU: NFCCTAP_MSG  CLA=0x80  INS=0x10  P1=0x80  P2=0x00  data=b"\x04"

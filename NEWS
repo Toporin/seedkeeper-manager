@@ -1,4 +1,7 @@
 
+* Version 5.9.4 (Seedkeeper fork)
+ ** Improve patch uncaught exception on Windows when selecting FIDO2 applet without admin rights
+
 * Version 5.9.3 (Seedkeeper fork)
  ** Patch uncaught exception on Windows when selecting FIDO2 applet without admin rights
 

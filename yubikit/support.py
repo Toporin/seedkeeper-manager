@@ -28,6 +28,8 @@
 import logging
 from dataclasses import replace
 
+from smartcard.Exceptions import CardConnectionException
+
 from .core import (
     PID,
     SEEDKEEPER,
@@ -145,7 +147,13 @@ def _detect_fido_capabilities(protocol: SmartCardProtocol) -> CAPABILITY:
     """Probe the FIDO applet to distinguish U2F-only from FIDO2 (CTAP2) devices."""
     try:
         protocol.select(AID.FIDO)
-    except ApplicationNotAvailableError:
+    except (ApplicationNotAvailableError, CardConnectionException) as e:
+        if isinstance(e, CardConnectionException):
+            logger.debug(
+                "Failed to connect, on Windows admin rights may be required!",
+                exc_info=True,
+            )
+
         # Fall back to old Yubico U2F AID
         try:
             protocol.select(_AID_U2F_YUBICO)

@@ -1,3 +1,7 @@
+
+* Version 5.9.3 (Seedkeeper fork)
+ ** Patch uncaught exception on Windows when selecting FIDO2 applet without admin rights
+
 * Version 5.9.1 (released 2026-04-15)
  ** Restrict DLL search paths (YSA-2026-01).
  ** Improve device information when listing YubiKeys with no serial number visible over OTP.

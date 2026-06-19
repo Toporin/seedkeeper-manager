@@ -158,7 +158,7 @@ def _detect_fido_capabilities(protocol: SmartCardProtocol) -> CAPABILITY:
             return CAPABILITY(0)
     except CardConnectionException:
         # on windows, FIDO2 access requires admin rights
-        if sys.platform == "win32" and bool(ctypes.windll.shell32.IsUserAnAdmin()):
+        if sys.platform == "win32" and not bool(ctypes.windll.shell32.IsUserAnAdmin()):
             logger.debug(
                 "Failed to connect, on Windows admin rights are required!",
                 exc_info=True,

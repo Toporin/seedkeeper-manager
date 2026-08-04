@@ -316,6 +316,7 @@ class DeviceInfo:
     fps_version: Version | None = None
     stm_version: Version | None = None
     version_qualifier: VersionQualifier = _DUMMY_VQ
+    seedkeeper_applet_version: str | None = None
 
     @property
     def _is_bio(self) -> bool:

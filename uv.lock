@@ -868,7 +868,7 @@ wheels = [
 
 [[package]]
 name = "seedkeeper-manager"
-version = "5.9.5"
+version = "5.9.6"
 source = { editable = "." }
 dependencies = [
     { name = "click" },

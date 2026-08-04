@@ -1,6 +1,6 @@
 [project]
 name = "seedkeeper-manager"
-version = "5.9.5"
+version = "5.9.6"
 description = "Satochip fork of yubikey-manager: library and CLI for managing your YubiKey/Seedkeeper configuration. Drop-in replacement (same `yubikit`/`ykman` import names)."
 authors = [
   { name = "Dain Nilsson", email = "<dain@yubico.com>" }

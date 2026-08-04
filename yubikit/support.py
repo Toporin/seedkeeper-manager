@@ -145,6 +145,27 @@ def _device_info_from_ctap2(info) -> DeviceInfo | None:
     )
 
 
+def _read_seedkeeper_applet_version(conn: SmartCardConnection) -> str | None:
+    """Read the Seedkeeper applet version via the getStatus APDU, or None.
+
+    getStatus (CLA=0xB0 INS=0x3C) returns a status blob whose first four bytes are
+    [protocol_major, protocol_minor, applet_major, applet_minor]; formatted here as
+    ``"xx.yy-zz.vv"``. Returns None if the applet or command is unavailable.
+    """
+    try:
+        protocol = SmartCardProtocol(conn)
+        protocol.select(AID.SEEDKEEPER)
+        resp = protocol.send_apdu(0xB0, 0x3C, 0x00, 0x00, b"", 0)
+        if len(resp) >= 4:
+            return f"{resp[0]}.{resp[1]}-{resp[2]}.{resp[3]}"
+        logger.debug("Seedkeeper getStatus response too short: %d", len(resp))
+    except (ApplicationNotAvailableError, ApduError):
+        logger.debug("Unable to read Seedkeeper applet version", exc_info=True)
+    except Exception:
+        logger.debug("Error reading Seedkeeper applet version", exc_info=True)
+    return None
+
+
 def _detect_fido_capabilities(protocol: SmartCardProtocol) -> CAPABILITY:
     """Probe the FIDO applet to distinguish U2F-only from FIDO2 (CTAP2) devices."""
     try:
@@ -261,7 +282,7 @@ def _read_info_ccid(conn, key_type, interfaces):
     if USB_INTERFACE.FIDO in interfaces or version >= (3, 3, 0):
         capabilities |= CAPABILITY.U2F
 
-    return DeviceInfo(
+    info = DeviceInfo(
         config=DeviceConfig(
             enabled_capabilities={},  # Populated later
             auto_eject_timeout=0,
@@ -278,6 +299,9 @@ def _read_info_ccid(conn, key_type, interfaces):
         is_locked=False,
         version_qualifier=VersionQualifier(version),
     )
+    if capabilities & CAPABILITY.SEEDKEEPER:
+        info.seedkeeper_applet_version = _read_seedkeeper_applet_version(conn)
+    return info
 
 
 def _read_info_otp(conn, key_type, interfaces):

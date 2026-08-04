@@ -115,10 +115,10 @@ class EnumChoice(click.Choice):
     Underscores in enum names are translated to dashes in the option choice.
     """
 
-    def __init__(self, choices_enum, hidden=[]):
-        self.choices_names = [
+    def __init__(self, choices_enum, hidden=()):
+        self.choices_names = tuple(
             v.name.replace("_", "-") for v in choices_enum if v not in hidden
-        ]
+        )
         super().__init__(
             self.choices_names,
             case_sensitive=False,
@@ -132,11 +132,11 @@ class EnumChoice(click.Choice):
 
         try:
             # Allow aliases
-            self.choices = [
+            self.choices = tuple(
                 k.replace("_", "-")
                 for k, v in self.choices_enum.__members__.items()
                 if v not in self.hidden
-            ]
+            )
             name = super().convert(value, param, ctx).replace("-", "_")
         finally:
             self.choices = self.choices_names
